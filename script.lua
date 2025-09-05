@@ -1,63 +1,14 @@
--- Da Hood Ultimate Cheat with Ban Bypass
+-- Da Hood Ultimate Cheat by Quarz
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
--- Ban Bypass Setup (Load First)
-local function setupBanBypass()
-    -- Hook Protection
-    local mt = getrawmetatable(game)
-    local oldNamecall = mt.__namecall
-    local oldIndex = mt.__index
-    
-    setreadonly(mt, false)
-    
-    mt.__namecall = function(self, ...)
-        local method = getnamecallmethod()
-        local args = {...}
-        
-        if method == "FireServer" or method == "InvokeServer" then
-            if string.find(tostring(self), "Ban") or string.find(tostring(self), "Kick") or string.find(tostring(self), "AntiCheat") then
-                return
-            end
-        end
-        
-        return oldNamecall(self, ...)
-    end
-    
-    mt.__index = function(self, key)
-        if key == "Kick" or key == "Ban" then
-            return function() end
-        end
-        return oldIndex(self, key)
-    end
-    
-    setreadonly(mt, true)
-    
-    -- Memory Protection
-    spawn(function()
-        for i,v in pairs(getgc()) do
-            if type(v) == "function" and islclosure(v) then
-                local info = debug.getinfo(v)
-                if info and info.source and string.find(info.source, "AntiCheat") then
-                    hookfunction(v, function() end)
-                end
-            end
-        end
-    end)
-end
-
-setupBanBypass()
-
 -- Settings
 local Settings = {
-    -- Aimbot
     AimbotEnabled = false,
     SilentAim = false,
     SmoothAim = false,
@@ -67,56 +18,46 @@ local Settings = {
     SmoothSpeed = 5,
     TargetPart = "Head",
     FOVCircle = true,
-    
-    -- Movement
     SpeedHack = false,
     FlyHack = false,
     Noclip = false,
     SpeedValue = 50,
     JumpPower = 50,
-    
-    -- Visual
     ESPEnabled = true,
     CrosshairEnabled = true,
-    Wallhack = false,
-    Chams = false,
-    Tracers = false,
     HealthESP = true,
-    
-    -- Combat
     KillAura = false,
-    RapidFire = false,
-    InfiniteAmmo = false,
     GodMode = false,
     KillAuraRange = 20,
-    
-    -- Da Hood Specific
     AutoStomp = false,
     AutoReload = false,
     AutoPickup = false,
     CashGrab = false,
     AntiStomp = false,
-    AntiGrab = false,
     TeleportToGuns = false,
     AutoRob = false,
-    InfiniteStamina = false,
-    AutoArmor = false,
-    
-    -- Ban Bypass
-    AntiCheatBypass = true,
-    HookBypass = true,
-    MemoryBypass = true,
-    NetworkBypass = true,
-    
-    -- Utility
-    AntiKick = false,
-    AutoFarm = false,
-    ChatSpam = false,
-    SpamText = "EZ"
+    InfiniteStamina = false
 }
 
 local crosshair, Target, mainGui = nil, nil, nil
 local connections = {}
+
+-- Ban Bypass
+pcall(function()
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = function(self, ...)
+        local method = getnamecallmethod()
+        if method == "FireServer" or method == "InvokeServer" then
+            if string.find(tostring(self), "Ban") or string.find(tostring(self), "Kick") then
+                return
+            end
+        end
+        return oldNamecall(self, ...)
+    end
+    setreadonly(mt, true)
+end)
 
 -- GUI Creation
 local function createGUI()
@@ -126,8 +67,7 @@ local function createGUI()
     mainGui = screenGui
 
     local mainFrame = Instance.new("Frame")
-    mainFrame.Name = "MainFrame"
-    mainFrame.Size = UDim2.new(0, 500, 0, 650)
+    mainFrame.Size = UDim2.new(0, 450, 0, 600)
     mainFrame.Position = UDim2.new(0, 50, 0, 50)
     mainFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 15)
     mainFrame.BorderSizePixel = 2
@@ -152,7 +92,7 @@ local function createGUI()
     titleLabel.Size = UDim2.new(1, -80, 1, 0)
     titleLabel.Position = UDim2.new(0, 10, 0, 0)
     titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "Made BY Quarz | Da Hood Cheat"
+    titleLabel.Text = "🏠 DA HOOD CHEAT BY QUARZ 🏠"
     titleLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
     titleLabel.TextScaled = true
     titleLabel.Font = Enum.Font.GothamBold
@@ -176,20 +116,9 @@ local function createGUI()
         mainFrame.Visible = false
     end)
 
-    local tabFrame = Instance.new("Frame")
-    tabFrame.Size = UDim2.new(1, -10, 0, 40)
-    tabFrame.Position = UDim2.new(0, 5, 0, 40)
-    tabFrame.BackgroundTransparency = 1
-    tabFrame.Parent = mainFrame
-
-    local tabLayout = Instance.new("UIListLayout", tabFrame)
-    tabLayout.FillDirection = Enum.FillDirection.Horizontal
-    tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabLayout.Padding = UDim.new(0, 2)
-
     local contentFrame = Instance.new("ScrollingFrame")
-    contentFrame.Size = UDim2.new(1, -10, 1, -90)
-    contentFrame.Position = UDim2.new(0, 5, 0, 85)
+    contentFrame.Size = UDim2.new(1, -10, 1, -50)
+    contentFrame.Position = UDim2.new(0, 5, 0, 40)
     contentFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 10)
     contentFrame.BorderSizePixel = 1
     contentFrame.BorderColor3 = Color3.fromRGB(0, 10, 25)
@@ -200,71 +129,17 @@ local function createGUI()
     local contentCorner = Instance.new("UICorner", contentFrame)
     contentCorner.CornerRadius = UDim.new(0, 6)
 
-    local contentLayout = Instance.new("UIListLayout", contentFrame)
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Padding = UDim.new(0, 5)
+    local layout = Instance.new("UIListLayout", contentFrame)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 5)
 
-    local tabs = {}
-    local currentTab = nil
-
-    local function createTab(name, icon)
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(0, 70, 1, 0)
-        tabButton.BackgroundColor3 = Color3.fromRGB(0, 5, 20)
-        tabButton.Text = icon .. "\n" .. name
-        tabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-        tabButton.TextScaled = true
-        tabButton.Font = Enum.Font.Gotham
-        tabButton.BorderSizePixel = 0
-        tabButton.Parent = tabFrame
-
-        local tabCorner = Instance.new("UICorner", tabButton)
-        tabCorner.CornerRadius = UDim.new(0, 4)
-
-        local tabContent = Instance.new("Frame")
-        tabContent.Size = UDim2.new(1, 0, 0, 0)
-        tabContent.BackgroundTransparency = 1
-        tabContent.Visible = false
-        tabContent.Parent = contentFrame
-
-        local tabContentLayout = Instance.new("UIListLayout", tabContent)
-        tabContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        tabContentLayout.Padding = UDim.new(0, 5)
-
-        tabs[name] = {button = tabButton, content = tabContent, items = 0}
-
-        tabButton.MouseButton1Click:Connect(function()
-            if currentTab then
-                currentTab.button.BackgroundColor3 = Color3.fromRGB(0, 5, 20)
-                currentTab.button.TextColor3 = Color3.fromRGB(150, 150, 150)
-                currentTab.content.Visible = false
-            end
-            currentTab = tabs[name]
-            tabButton.BackgroundColor3 = Color3.fromRGB(0, 20, 50)
-            tabButton.TextColor3 = Color3.fromRGB(0, 150, 255)
-            tabContent.Visible = true
-        end)
-
-        return tabContent
-    end
-
-    local aimbotTab = createTab("Aimbot", "🎯")
-    local movementTab = createTab("Movement", "🏃")
-    local visualTab = createTab("Visual", "👁️")
-    local combatTab = createTab("Combat", "⚔️")
-    local dahoodTab = createTab("DaHood", "🏠")
-    local bypassTab = createTab("Bypass", "🛡️")
-    local utilityTab = createTab("Utility", "🔧")
-
-    tabs["Aimbot"].button.MouseButton1Click()
-
-    local function createToggle(parent, name, icon, setting, callback)
+    local function createToggle(name, icon, setting)
         local toggleFrame = Instance.new("Frame")
         toggleFrame.Size = UDim2.new(1, -10, 0, 40)
         toggleFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 25)
         toggleFrame.BorderSizePixel = 1
         toggleFrame.BorderColor3 = Color3.fromRGB(0, 15, 35)
-        toggleFrame.Parent = parent
+        toggleFrame.Parent = contentFrame
 
         local toggleCorner = Instance.new("UICorner", toggleFrame)
         toggleCorner.CornerRadius = UDim.new(0, 6)
@@ -298,21 +173,16 @@ local function createGUI()
             Settings[setting] = not Settings[setting]
             button.BackgroundColor3 = Settings[setting] and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
             button.Text = Settings[setting] and "ON" or "OFF"
-            if callback then callback(Settings[setting]) end
         end)
-
-        tabs[parent.Parent.Name:gsub("Tab", "")].items = tabs[parent.Parent.Name:gsub("Tab", "")].items + 1
-        parent.Size = UDim2.new(1, 0, 0, tabs[parent.Parent.Name:gsub("Tab", "")].items * 45)
-        contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y)
     end
 
-    local function createSlider(parent, name, icon, setting, minVal, maxVal, callback)
+    local function createSlider(name, icon, setting, minVal, maxVal)
         local sliderFrame = Instance.new("Frame")
         sliderFrame.Size = UDim2.new(1, -10, 0, 60)
         sliderFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 25)
         sliderFrame.BorderSizePixel = 1
         sliderFrame.BorderColor3 = Color3.fromRGB(0, 15, 35)
-        sliderFrame.Parent = parent
+        sliderFrame.Parent = contentFrame
 
         local sliderCorner = Instance.new("UICorner", sliderFrame)
         sliderCorner.CornerRadius = UDim.new(0, 6)
@@ -368,152 +238,48 @@ local function createGUI()
                 Settings[setting] = value
                 sliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
                 label.Text = icon .. " " .. name .. ": " .. value
-                if callback then callback(value) end
             end
         end)
-
-        tabs[parent.Parent.Name:gsub("Tab", "")].items = tabs[parent.Parent.Name:gsub("Tab", "")].items + 1
-        parent.Size = UDim2.new(1, 0, 0, tabs[parent.Parent.Name:gsub("Tab", "")].items * 45)
-        contentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y)
     end
 
-    -- AIMBOT TAB
-    aimbotTab.Name = "AimbotTab"
-    createToggle(aimbotTab, "Aimbot", "🎯", "AimbotEnabled")
-    createToggle(aimbotTab, "Silent Aim", "🤫", "SilentAim")
-    createToggle(aimbotTab, "Smooth Aim", "🌊", "SmoothAim")
-    createToggle(aimbotTab, "Prediction", "🔮", "Prediction")
-    createToggle(aimbotTab, "FOV Circle", "⭕", "FOVCircle")
-    createSlider(aimbotTab, "Aim Radius", "📏", "AimRadius", 50, 300)
-    createSlider(aimbotTab, "Max Distance", "📐", "MaxLockDistance", 50, 500)
-    createSlider(aimbotTab, "Smooth Speed", "⚡", "SmoothSpeed", 1, 20)
+    -- Create toggles and sliders
+    createToggle("Aimbot", "🎯", "AimbotEnabled")
+    createToggle("Silent Aim", "🤫", "SilentAim")
+    createToggle("Smooth Aim", "🌊", "SmoothAim")
+    createToggle("Prediction", "🔮", "Prediction")
+    createToggle("FOV Circle", "⭕", "FOVCircle")
+    createSlider("Aim Radius", "📏", "AimRadius", 50, 300)
+    createSlider("Max Distance", "📐", "MaxLockDistance", 50, 500)
+    createSlider("Smooth Speed", "⚡", "SmoothSpeed", 1, 20)
+    
+    createToggle("Speed Hack", "💨", "SpeedHack")
+    createToggle("Fly Hack", "🚁", "FlyHack")
+    createToggle("Noclip", "👻", "Noclip")
+    createSlider("Speed Value", "🏃", "SpeedValue", 16, 200)
+    createSlider("Jump Power", "🦘", "JumpPower", 50, 200)
+    
+    createToggle("ESP", "👁️", "ESPEnabled")
+    createToggle("Crosshair", "⊕", "CrosshairEnabled")
+    createToggle("Health ESP", "❤️", "HealthESP")
+    
+    createToggle("Kill Aura", "⚔️", "KillAura")
+    createToggle("God Mode", "🛡️", "GodMode")
+    createSlider("Kill Aura Range", "📊", "KillAuraRange", 5, 50)
+    
+    createToggle("Auto Stomp", "🦶", "AutoStomp")
+    createToggle("Auto Reload", "🔄", "AutoReload")
+    createToggle("Auto Pickup", "📦", "AutoPickup")
+    createToggle("Cash Grab", "💰", "CashGrab")
+    createToggle("Anti Stomp", "🛡️", "AntiStomp")
+    createToggle("TP to Guns", "🔫", "TeleportToGuns")
+    createToggle("Auto Rob", "🏪", "AutoRob")
+    createToggle("Infinite Stamina", "⚡", "InfiniteStamina")
 
-    -- MOVEMENT TAB
-    movementTab.Name = "MovementTab"
-    createToggle(movementTab, "Speed Hack", "💨", "SpeedHack")
-    createToggle(movementTab, "Fly Hack", "🚁", "FlyHack")
-    createToggle(movementTab, "Noclip", "👻", "Noclip")
-    createSlider(movementTab, "Speed Value", "🏃", "SpeedValue", 16, 200)
-    createSlider(movementTab, "Jump Power", "🦘", "JumpPower", 50, 200)
-
-    -- VISUAL TAB
-    visualTab.Name = "VisualTab"
-    createToggle(visualTab, "ESP", "👁️", "ESPEnabled")
-    createToggle(visualTab, "Crosshair", "⊕", "CrosshairEnabled")
-    createToggle(visualTab, "Wallhack", "🧱", "Wallhack")
-    createToggle(visualTab, "Chams", "🌈", "Chams")
-    createToggle(visualTab, "Tracers", "📏", "Tracers")
-    createToggle(visualTab, "Health ESP", "❤️", "HealthESP")
-
-    -- COMBAT TAB
-    combatTab.Name = "CombatTab"
-    createToggle(combatTab, "Kill Aura", "⚔️", "KillAura")
-    createToggle(combatTab, "Rapid Fire", "🔫", "RapidFire")
-    createToggle(combatTab, "Infinite Ammo", "∞", "InfiniteAmmo")
-    createToggle(combatTab, "God Mode", "🛡️", "GodMode")
-    createSlider(combatTab, "Kill Aura Range", "📊", "KillAuraRange", 5, 50)
-
-    -- DA HOOD TAB
-    dahoodTab.Name = "DaHoodTab"
-    createToggle(dahoodTab, "Auto Stomp", "🦶", "AutoStomp")
-    createToggle(dahoodTab, "Auto Reload", "🔄", "AutoReload")
-    createToggle(dahoodTab, "Auto Pickup", "📦", "AutoPickup")
-    createToggle(dahoodTab, "Cash Grab", "💰", "CashGrab")
-    createToggle(dahoodTab, "Anti Stomp", "🛡️", "AntiStomp")
-    createToggle(dahoodTab, "Anti Grab", "🚫", "AntiGrab")
-    createToggle(dahoodTab, "TP to Guns", "🔫", "TeleportToGuns")
-    createToggle(dahoodTab, "Auto Rob", "🏪", "AutoRob")
-    createToggle(dahoodTab, "Infinite Stamina", "⚡", "InfiniteStamina")
-    createToggle(dahoodTab, "Auto Armor", "🦺", "AutoArmor")
-
-    -- BYPASS TAB
-    bypassTab.Name = "BypassTab"
-    createToggle(bypassTab, "AntiCheat Bypass", "🔓", "AntiCheatBypass")
-    createToggle(bypassTab, "Hook Bypass", "🪝", "HookBypass")
-    createToggle(bypassTab, "Memory Bypass", "🧠", "MemoryBypass")
-    createToggle(bypassTab, "Network Bypass", "🌐", "NetworkBypass")
-
-    -- UTILITY TAB
-    utilityTab.Name = "UtilityTab"
-    createToggle(utilityTab, "Anti Kick", "🛡️", "AntiKick")
-    createToggle(utilityTab, "Auto Farm", "🚜", "AutoFarm")
-    createToggle(utilityTab, "Chat Spam", "💬", "ChatSpam")
+    contentFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
 
     UserInputService.InputBegan:Connect(function(input, gp)
-        if not gp and input.KeyCode == Enum.KeyCode.RightShift then  -- SAĞ SHIFT tuşu
+        if not gp and input.KeyCode == Enum.KeyCode.RightShift then
             mainFrame.Visible = not mainFrame.Visible
-        end
-    end)
-end
-
--- Da Hood Features
-local function setupDaHoodFeatures()
-    connections[#connections + 1] = RunService.Heartbeat:Connect(function()
-        if LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
-            
-            -- Auto Stomp
-            if Settings.AutoStomp then
-                for _, player in pairs(Players:GetPlayers()) do
-                    if player ~= LocalPlayer and player.Character then
-                        local humanoid = player.Character:FindFirstChild("Humanoid")
-                        if humanoid and humanoid.PlatformStand then
-                            local distance = (LocalPlayer.Character.PrimaryPart.Position - player.Character.PrimaryPart.Position).Magnitude
-                            if distance <= 10 then
-                                game:GetService("ReplicatedStorage").MainEvent:FireServer("Stomp")
-                            end
-                        end
-                    end
-                end
-            end
-            
-            -- Cash Grab
-            if Settings.CashGrab then
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj.Name == "Part" and obj:FindFirstChild("TouchInterest") and obj:FindFirstChild("Weld") then
-                        if (LocalPlayer.Character.PrimaryPart.Position - obj.Position).Magnitude <= 20 then
-                            LocalPlayer.Character.PrimaryPart.CFrame = obj.CFrame
-                        end
-                    end
-                end
-            end
-            
-            -- Auto Pickup
-            if Settings.AutoPickup then
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("Tool") and (obj.Name:find("Glock") or obj.Name:find("AK47") or obj.Name:find("AR")) then
-                        if (LocalPlayer.Character.PrimaryPart.Position - obj.Handle.Position).Magnitude <= 15 then
-                            obj.Handle.CFrame = LocalPlayer.Character.PrimaryPart.CFrame
-                        end
-                    end
-                end
-            end
-            
-            -- Anti Stomp
-            if Settings.AntiStomp then
-                local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
-                if humanoid and humanoid.PlatformStand then
-                    humanoid.PlatformStand = false
-                    LocalPlayer.Character.PrimaryPart.CFrame = LocalPlayer.Character.PrimaryPart.CFrame + Vector3.new(0, 10, 0)
-                end
-            end
-            
-            -- Auto Reload
-            if Settings.AutoReload then
-                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if tool and tool:FindFirstChild("Ammo") then
-                    if tool.Ammo.Value <= 5 then
-                        game:GetService("ReplicatedStorage").MainEvent:FireServer("Reload", tool)
-                    end
-                end
-            end
-            
-            -- Infinite Stamina
-            if Settings.InfiniteStamina then
-                local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.WalkSpeed = Settings.SpeedHack and Settings.SpeedValue or 16
-                end
-            end
         end
     end)
 end
@@ -535,6 +301,7 @@ local function createCrosshair()
         if input.UserInputType == Enum.UserInputType.MouseMovement and Settings.CrosshairEnabled then
             crosshair.Position = UDim2.new(0, input.Position.X, 0, input.Position.Y)
             crosshair.Visible = Settings.CrosshairEnabled and Settings.FOVCircle
+            crosshair.Size = UDim2.new(0, Settings.AimRadius*2, 0, Settings.AimRadius*2)
         end
     end)
 end
@@ -634,6 +401,74 @@ local function GetClosestPlayer()
     return closest
 end
 
+-- Da Hood Features
+local function setupDaHoodFeatures()
+    connections[#connections + 1] = RunService.Heartbeat:Connect(function()
+        if LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
+            
+            -- Auto Stomp
+            if Settings.AutoStomp then
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        local humanoid = player.Character:FindFirstChild("Humanoid")
+                        if humanoid and humanoid.PlatformStand then
+                            local distance = (LocalPlayer.Character.PrimaryPart.Position - player.Character.PrimaryPart.Position).Magnitude
+                            if distance <= 10 then
+                                pcall(function()
+                                    game:GetService("ReplicatedStorage").MainEvent:FireServer("Stomp")
+                                end)
+                            end
+                        end
+                    end
+                end
+            end
+            
+            -- Cash Grab
+            if Settings.CashGrab then
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj.Name == "Part" and obj:FindFirstChild("TouchInterest") and obj:FindFirstChild("Weld") then
+                        if (LocalPlayer.Character.PrimaryPart.Position - obj.Position).Magnitude <= 20 then
+                            LocalPlayer.Character.PrimaryPart.CFrame = obj.CFrame
+                        end
+                    end
+                end
+            end
+            
+            -- Auto Pickup
+            if Settings.AutoPickup then
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:IsA("Tool") and (obj.Name:find("Glock") or obj.Name:find("AK47") or obj.Name:find("AR")) then
+                        if obj:FindFirstChild("Handle") and (LocalPlayer.Character.PrimaryPart.Position - obj.Handle.Position).Magnitude <= 15 then
+                            obj.Handle.CFrame = LocalPlayer.Character.PrimaryPart.CFrame
+                        end
+                    end
+                end
+            end
+            
+            -- Anti Stomp
+            if Settings.AntiStomp then
+                local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+                if humanoid and humanoid.PlatformStand then
+                    humanoid.PlatformStand = false
+                    LocalPlayer.Character.PrimaryPart.CFrame = LocalPlayer.Character.PrimaryPart.CFrame + Vector3.new(0, 10, 0)
+                end
+            end
+            
+            -- Auto Reload
+            if Settings.AutoReload then
+                local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                if tool and tool:FindFirstChild("Ammo") then
+                    if tool.Ammo.Value <= 5 then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").MainEvent:FireServer("Reload", tool)
+                        end)
+                    end
+                end
+            end
+        end
+    end)
+end
+
 -- Movement Hacks
 local function setupMovementHacks()
     connections[#connections + 1] = RunService.Heartbeat:Connect(function()
@@ -655,6 +490,10 @@ local function setupMovementHacks()
                         part.CanCollide = false
                     end
                 end
+            end
+            
+            if Settings.GodMode and humanoid then
+                humanoid.Health = humanoid.MaxHealth
             end
         end
     end)
@@ -704,3 +543,5 @@ UserInputService.InputBegan:Connect(function(input, gp)
         end
     end
 end)
+
+print("🏠 Da Hood Cheat by Quarz loaded! Press Right Shift to open GUI")
